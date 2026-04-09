@@ -32,8 +32,8 @@ pub(crate) fn decode_historical_data(server_version: i32, time_zone: &Tz, messag
     let mut start = OffsetDateTime::now_utc();
     let mut end = OffsetDateTime::now_utc();
     if message_version > 2 && server_version < server_versions::HISTORICAL_DATA_END {
-        start = parse_date(&message.next_string()?, time_zone)?;
-        end = parse_date(&message.next_string()?, time_zone)?;
+        start = parse_date_with_tz(&message.next_string()?)?;
+        end = parse_date_with_tz(&message.next_string()?)?;
     }
 
     let mut bars = Vec::new();
