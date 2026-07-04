@@ -1222,6 +1222,7 @@ fn test_notice_is_cancellation() {
         code: 202,
         message: "Order Cancelled - reason:".to_string(),
         error_time: None,
+        order_id: None,
     };
     assert!(cancellation.is_cancellation());
     assert!(!cancellation.is_warning());
@@ -1234,6 +1235,7 @@ fn test_notice_is_cancellation() {
         code: 200,
         message: "No security definition found".to_string(),
         error_time: None,
+        order_id: None,
     };
     assert!(!error.is_cancellation());
 }
@@ -1247,6 +1249,7 @@ fn test_notice_is_warning() {
             code,
             message: format!("Warning with code {}", code),
             error_time: None,
+            order_id: None,
         };
         assert!(notice.is_warning(), "Code {} should be a warning", code);
         assert!(!notice.is_cancellation());
@@ -1262,6 +1265,7 @@ fn test_notice_is_warning() {
             code,
             message: format!("Non-warning with code {}", code),
             error_time: None,
+            order_id: None,
         };
         assert!(!notice.is_warning(), "Code {} should not be a warning", code);
     }
@@ -1281,6 +1285,7 @@ fn test_notice_is_system_message() {
             code,
             message: msg.to_string(),
             error_time: None,
+            order_id: None,
         };
         assert!(notice.is_system_message(), "Code {} should be a system message", code);
         assert!(!notice.is_cancellation());
@@ -1296,6 +1301,7 @@ fn test_notice_is_system_message() {
             code,
             message: format!("Non-system message with code {}", code),
             error_time: None,
+            order_id: None,
         };
         assert!(!notice.is_system_message(), "Code {} should not be a system message", code);
     }
@@ -1310,6 +1316,7 @@ fn test_notice_is_informational() {
             code,
             message: format!("Informational code {}", code),
             error_time: None,
+            order_id: None,
         };
         assert!(notice.is_informational(), "Code {} should be informational", code);
         assert!(!notice.is_error(), "Code {} should not be an error", code);
@@ -1322,6 +1329,7 @@ fn test_notice_is_informational() {
             code,
             message: format!("Error code {}", code),
             error_time: None,
+            order_id: None,
         };
         assert!(!notice.is_informational(), "Code {} should not be informational", code);
         assert!(notice.is_error(), "Code {} should be an error", code);
@@ -1335,6 +1343,7 @@ fn test_notice_is_error() {
         code: 200,
         message: "No security definition found".to_string(),
         error_time: None,
+        order_id: None,
     };
     assert!(error.is_error());
     assert!(!error.is_informational());
@@ -1344,6 +1353,7 @@ fn test_notice_is_error() {
         code: 202,
         message: "Order Cancelled".to_string(),
         error_time: None,
+        order_id: None,
     };
     assert!(!cancellation.is_error());
     assert!(cancellation.is_informational());
@@ -1353,6 +1363,7 @@ fn test_notice_is_error() {
         code: 1100,
         message: "Connectivity lost".to_string(),
         error_time: None,
+        order_id: None,
     };
     assert!(!system_msg.is_error());
     assert!(system_msg.is_informational());
@@ -1362,6 +1373,7 @@ fn test_notice_is_error() {
         code: 2107,
         message: "HMDS data farm connection is inactive.".to_string(),
         error_time: None,
+        order_id: None,
     };
     assert!(!warning.is_error());
     assert!(warning.is_informational());

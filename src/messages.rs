@@ -1181,6 +1181,12 @@ pub struct Notice {
     /// Timestamp when the error occurred.
     /// Only present for server versions >= ERROR_TIME (194).
     pub error_time: Option<OffsetDateTime>,
+    /// Order/request id this notice pertains to, when the error message carries
+    /// one — IB sends the affected `orderId` as the error's request id. `None`
+    /// for general/system notices (request id `-1`). Lets order-rejection
+    /// errors be tied back to the order that triggered them.
+    #[serde(default)]
+    pub order_id: Option<i32>,
 }
 
 /// Error code indicating an order was cancelled (confirmation, not an error).
@@ -1202,8 +1208,17 @@ impl Notice {
     pub fn from(message: &ResponseMessage) -> Notice {
         let code = message.error_code();
         let error_time = message.error_time();
+        // IB delivers the affected orderId as the error's request id; -1 means
+        // the notice isn't tied to a specific request/order.
+        let req_id = message.error_request_id();
+        let order_id = (req_id > 0).then_some(req_id);
         let message = message.error_message();
-        Notice { code, message, error_time }
+        Notice {
+            code,
+            message,
+            error_time,
+            order_id,
+        }
     }
 
     /// Returns `true` if this notice indicates an order was cancelled (code 202).
