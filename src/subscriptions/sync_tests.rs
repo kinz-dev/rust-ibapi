@@ -111,6 +111,7 @@ fn test_routed_item_notice_surfaces_as_subscription_item() {
             message: "Market data farm OK".into(),
             error_time: None,
             advanced_order_reject_json: String::new(),
+            order_id: None,
         }))
         .unwrap();
     sender.send(RoutedItem::Response(ResponseMessage::from("1|data\0"))).unwrap();

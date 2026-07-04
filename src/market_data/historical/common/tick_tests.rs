@@ -63,6 +63,7 @@ fn classify_notice_returns_notice() {
         message: "some warning".into(),
         error_time: None,
         advanced_order_reject_json: String::new(),
+        order_id: None,
     };
     match classify::<TickLast>(RoutedItem::Notice(notice.clone())) {
         TickAction::Notice(n) => {

@@ -925,6 +925,7 @@ fn test_notice_is_cancellation() {
         message: "Order Cancelled - reason:".to_string(),
         error_time: None,
         advanced_order_reject_json: String::new(),
+        order_id: None,
     };
     assert!(cancellation.is_cancellation());
     assert!(!cancellation.is_warning());
@@ -938,6 +939,7 @@ fn test_notice_is_cancellation() {
         message: "No security definition found".to_string(),
         error_time: None,
         advanced_order_reject_json: String::new(),
+        order_id: None,
     };
     assert!(!error.is_cancellation());
 }
@@ -952,6 +954,7 @@ fn test_notice_is_warning() {
             message: format!("Warning with code {}", code),
             error_time: None,
             advanced_order_reject_json: String::new(),
+            order_id: None,
         };
         assert!(notice.is_warning(), "Code {} should be a warning", code);
         assert!(!notice.is_cancellation());
@@ -968,6 +971,7 @@ fn test_notice_is_warning() {
             message: format!("Non-warning with code {}", code),
             error_time: None,
             advanced_order_reject_json: String::new(),
+            order_id: None,
         };
         assert!(!notice.is_warning(), "Code {} should not be a warning", code);
     }
@@ -988,6 +992,7 @@ fn test_notice_is_system_message() {
             message: msg.to_string(),
             error_time: None,
             advanced_order_reject_json: String::new(),
+            order_id: None,
         };
         assert!(notice.is_system_message(), "Code {} should be a system message", code);
         assert!(!notice.is_cancellation());
@@ -1004,6 +1009,7 @@ fn test_notice_is_system_message() {
             message: format!("Non-system message with code {}", code),
             error_time: None,
             advanced_order_reject_json: String::new(),
+            order_id: None,
         };
         assert!(!notice.is_system_message(), "Code {} should not be a system message", code);
     }
@@ -1019,6 +1025,7 @@ fn test_notice_is_informational() {
             message: format!("Informational code {}", code),
             error_time: None,
             advanced_order_reject_json: String::new(),
+            order_id: None,
         };
         assert!(notice.is_informational(), "Code {} should be informational", code);
         assert!(!notice.is_error(), "Code {} should not be an error", code);
@@ -1032,6 +1039,7 @@ fn test_notice_is_informational() {
             message: format!("Error code {}", code),
             error_time: None,
             advanced_order_reject_json: String::new(),
+            order_id: None,
         };
         assert!(!notice.is_informational(), "Code {} should not be informational", code);
         assert!(notice.is_error(), "Code {} should be an error", code);
@@ -1046,6 +1054,7 @@ fn test_notice_is_error() {
         message: "No security definition found".to_string(),
         error_time: None,
         advanced_order_reject_json: String::new(),
+        order_id: None,
     };
     assert!(error.is_error());
     assert!(!error.is_informational());
@@ -1056,6 +1065,7 @@ fn test_notice_is_error() {
         message: "Order Cancelled".to_string(),
         error_time: None,
         advanced_order_reject_json: String::new(),
+        order_id: None,
     };
     assert!(!cancellation.is_error());
     assert!(cancellation.is_informational());
@@ -1066,6 +1076,7 @@ fn test_notice_is_error() {
         message: "Connectivity lost".to_string(),
         error_time: None,
         advanced_order_reject_json: String::new(),
+        order_id: None,
     };
     assert!(!system_msg.is_error());
     assert!(system_msg.is_informational());
@@ -1076,6 +1087,7 @@ fn test_notice_is_error() {
         message: "HMDS data farm connection is inactive.".to_string(),
         error_time: None,
         advanced_order_reject_json: String::new(),
+        order_id: None,
     };
     assert!(!warning.is_error());
     assert!(warning.is_informational());
@@ -1087,6 +1099,7 @@ fn notice_with_code(code: i32) -> Notice {
         message: String::new(),
         error_time: None,
         advanced_order_reject_json: String::new(),
+        order_id: None,
     }
 }
 
@@ -1438,4 +1451,29 @@ fn test_response_message_special_double_values() {
     msg.i = 1;
     let result = msg.next_double().unwrap();
     assert_eq!(result, 0.0);
+}
+
+#[test]
+fn test_notice_order_id_from_decoded_error() {
+    use crate::transport::routing::DecodedError;
+
+    // Order-scoped error: IB delivers the affected orderId as the request id.
+    let rejection = Notice::from(DecodedError {
+        request_id: 1234,
+        error_code: 201,
+        error_message: "Order rejected - reason:".to_string(),
+        error_time: None,
+        advanced_order_reject_json: String::new(),
+    });
+    assert_eq!(rejection.order_id, Some(1234));
+
+    // General/system notice: request id -1 must not surface as an order id.
+    let system = Notice::from(DecodedError {
+        request_id: -1,
+        error_code: 2104,
+        error_message: "Market data farm connection is OK".to_string(),
+        error_time: None,
+        advanced_order_reject_json: String::new(),
+    });
+    assert_eq!(system.order_id, None);
 }

@@ -53,6 +53,7 @@ fn test_notice(code: i32, message: &str) -> Notice {
         message: message.into(),
         error_time: None,
         advanced_order_reject_json: String::new(),
+        order_id: None,
     }
 }
 

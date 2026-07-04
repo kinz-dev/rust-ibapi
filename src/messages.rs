@@ -1095,6 +1095,12 @@ pub struct Notice {
     /// notices for server versions >= ADVANCED_ORDER_REJECT. Empty otherwise.
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub advanced_order_reject_json: String,
+    /// Order/request id this notice pertains to, when the error message carries
+    /// one — IB sends the affected `orderId` as the error's request id. `None`
+    /// for general/system notices (request id `-1`). Lets order-rejection
+    /// errors be tied back to the order that triggered them.
+    #[serde(default)]
+    pub order_id: Option<i32>,
 }
 
 /// Error code indicating an order was cancelled (confirmation, not an error).
@@ -1222,6 +1228,7 @@ impl Notice {
             message,
             error_time: None,
             advanced_order_reject_json: String::new(),
+            order_id: None,
         }
     }
 
@@ -1366,11 +1373,15 @@ impl From<crate::transport::routing::DecodedError> for Notice {
         let error_time = payload
             .error_time
             .and_then(|millis| OffsetDateTime::from_unix_timestamp_nanos(millis as i128 * 1_000_000).ok());
+        // IB delivers the affected orderId as the error's request id; -1 / 0
+        // means the notice isn't tied to a specific request/order.
+        let order_id = (payload.request_id > 0).then_some(payload.request_id);
         Notice {
             code: payload.error_code,
             message: payload.error_message,
             error_time,
             advanced_order_reject_json: payload.advanced_order_reject_json,
+            order_id,
         }
     }
 }

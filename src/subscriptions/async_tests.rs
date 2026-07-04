@@ -135,6 +135,7 @@ async fn test_routed_item_notice_skipped_then_response_delivered() {
         message: "Market data farm OK".into(),
         error_time: None,
         advanced_order_reject_json: String::new(),
+        order_id: None,
     }))
     .unwrap();
     tx.send(RoutedItem::Response(ResponseMessage::from("payload\0"))).unwrap();
@@ -470,6 +471,7 @@ async fn test_data_stream_filters_notices() {
         message: "Market data farm OK".into(),
         error_time: None,
         advanced_order_reject_json: String::new(),
+        order_id: None,
     }))
     .unwrap();
     tx.send(RoutedItem::Response(ResponseMessage::from("payload\0"))).unwrap();
@@ -502,6 +504,7 @@ async fn test_routed_item_notice_surfaces_as_subscription_item() {
         message: "Market data farm OK".into(),
         error_time: None,
         advanced_order_reject_json: String::new(),
+        order_id: None,
     }))
     .unwrap();
     tx.send(RoutedItem::Response(ResponseMessage::from("payload\0"))).unwrap();
@@ -594,6 +597,7 @@ async fn filter_data_stream_drops_notices() {
         message: "data farm OK".into(),
         error_time: None,
         advanced_order_reject_json: String::new(),
+        order_id: None,
     }))
     .unwrap();
     tx.send(RoutedItem::Response(ResponseMessage::from("13\0"))).unwrap();

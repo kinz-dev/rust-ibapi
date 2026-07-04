@@ -59,6 +59,7 @@ fn test_filter_notice() {
         message: "Market data farm OK".into(),
         error_time: None,
         advanced_order_reject_json: String::new(),
+        order_id: None,
     };
     assert!(filter_notice::<i32>(Ok(SubscriptionItem::Notice(notice))).is_none());
 
